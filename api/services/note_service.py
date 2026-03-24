@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from api.models.note import Note
 from api.schemas.note import NoteCreate
 from api.repositories.note_repository import NoteRepository
+from api.core.exceptions import NoteNotFoundException, InvalidDeadlineException
 
 # Lista de palabras no permitidas (saneamiento simple)
 _BAD_WORDS: frozenset[str] = frozenset({"spam", "ofensivo", "basura"})
@@ -31,15 +32,18 @@ class NoteService:
         )
         return await self._repo.create(note)
 
-    async def get_note(self, note_id: int) -> Note | None:
+    async def get_note(self, note_id: int) -> Note:
         """Obtiene una nota delegando la búsqueda al repositorio."""
-        return await self._repo.get_by_id(note_id)
+        note = await self._repo.get_by_id(note_id)
+        if not note:
+            raise NoteNotFoundException()
+        return note
 
-    async def complete_note(self, note_id: int) -> Note | None:
+    async def complete_note(self, note_id: int) -> Note:
         """Lógica para marcar una nota como completada."""
         note = await self._repo.get_by_id(note_id)
         if not note:
-            return None
+            raise NoteNotFoundException()
         note.is_completed = True
         return await self._repo.update(note)
 
@@ -56,7 +60,7 @@ class NoteService:
         if deadline.tzinfo is None:
             deadline = deadline.replace(tzinfo=timezone.utc)
         if deadline <= now:
-            raise ValueError("El deadline debe ser una fecha futura.")
+            raise InvalidDeadlineException()
 
     @staticmethod
     def _sanitize_text(text: str) -> str:
