@@ -36,11 +36,11 @@ def check(condition: bool, description: str) -> None:
 # 1. Pruebas de Salud (Health)
 # ---------------------------------------------------------------------------
 print("\n--- Salud (Health) ---")
-r = requests.get(f"{BASE_URL}/health/")
+r = requests.get(f"{BASE_URL}/health/", timeout=5)
 check(r.status_code == 200, "GET /health/ devuelve 200")
 check(r.json().get("status") == "ok", "El estado de salud es 'ok'")
 
-r = requests.get(f"{BASE_URL}/health/db")
+r = requests.get(f"{BASE_URL}/health/db", timeout=5)
 check(r.status_code == 200, "GET /health/db devuelve 200")
 check(r.json().get("database") == "conectada", "La base de datos está conectada")
 
@@ -54,7 +54,7 @@ payload = {
     "content": "Estudiar FastAPI",
     "deadline": future,
 }
-r = requests.post(NOTES_URL + "/", json=payload)
+r = requests.post(NOTES_URL + "/", json=payload, timeout=5)
 check(r.status_code == 201, "POST /notes/ devuelve 201")
 note_id = r.json().get("id")
 check(isinstance(note_id, int), f"Nota creada con id={note_id}")
@@ -64,7 +64,7 @@ check(r.json().get("is_completed") is False, "La nueva nota no está completada"
 # 3. Obtención de la nota creada
 # ---------------------------------------------------------------------------
 print("\n--- Obtener nota ---")
-r = requests.get(f"{NOTES_URL}/{note_id}")
+r = requests.get(f"{NOTES_URL}/{note_id}", timeout=5)
 check(r.status_code == 200, f"GET /notes/{note_id} devuelve 200")
 check(r.json().get("title") == "Mi primera tarea", "El título de la nota coincide")
 
@@ -72,7 +72,7 @@ check(r.json().get("title") == "Mi primera tarea", "El título de la nota coinci
 # 4. Marcar nota como completada
 # ---------------------------------------------------------------------------
 print("\n--- Completar nota ---")
-r = requests.put(f"{NOTES_URL}/{note_id}/complete")
+r = requests.put(f"{NOTES_URL}/{note_id}/complete", timeout=5)
 check(r.status_code == 200, f"PUT /notes/{note_id}/complete devuelve 200")
 check(r.json().get("is_completed") is True, "La nota ahora está completada")
 
@@ -80,7 +80,7 @@ check(r.json().get("is_completed") is True, "La nota ahora está completada")
 # 5. Obtener una nota inexistente → 404
 # ---------------------------------------------------------------------------
 print("\n--- Obtener nota inexistente ---")
-r = requests.get(f"{NOTES_URL}/99999")
+r = requests.get(f"{NOTES_URL}/99999", timeout=5)
 check(r.status_code == 404, "GET /notes/99999 devuelve 404")
 
 # ---------------------------------------------------------------------------
@@ -89,7 +89,9 @@ check(r.status_code == 404, "GET /notes/99999 devuelve 404")
 print("\n--- Validación: deadline pasado ---")
 past = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
 r = requests.post(
-    NOTES_URL + "/", json={"title": "Expirada", "content": "YA", "deadline": past}
+    NOTES_URL + "/",
+    json={"title": "Expirada", "content": "YA", "deadline": past},
+    timeout=5,
 )
 check(r.status_code == 422, "POST /notes/ con deadline pasado devuelve 422")
 
@@ -97,14 +99,14 @@ check(r.status_code == 422, "POST /notes/ con deadline pasado devuelve 422")
 # 7. Crear nota con campos faltantes → 422
 # ---------------------------------------------------------------------------
 print("\n--- Validación: campos faltantes ---")
-r = requests.post(NOTES_URL + "/", json={"title": "Sin deadline"})
+r = requests.post(NOTES_URL + "/", json={"title": "Sin deadline"}, timeout=5)
 check(r.status_code == 422, "POST /notes/ con campos faltantes devuelve 422")
 
 # ---------------------------------------------------------------------------
 # 8. Listado de notas expiradas
 # ---------------------------------------------------------------------------
 print("\n--- Notas expiradas ---")
-r = requests.get(f"{NOTES_URL}/expired")
+r = requests.get(f"{NOTES_URL}/expired", timeout=5)
 check(r.status_code == 200, "GET /notes/expired devuelve 200")
 check(isinstance(r.json(), list), "La respuesta es una lista")
 

@@ -1,11 +1,12 @@
 import logging
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.db.session import get_db
 from api.repositories.note_repository import NoteRepository
 from api.services.note_service import NoteService
 from api.schemas.note import NoteCreate, NoteResponse
+
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -27,13 +28,7 @@ async def create_note(
     El 'deadline' debe ser una fecha futura.
     Se aplican reglas de saneamiento de texto.
     """
-    try:
-        note = await service.create_note(payload)
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
-            detail=str(exc)
-        )
+    note = await service.create_note(payload)
     return NoteResponse.model_validate(note)
 
 
@@ -53,11 +48,6 @@ async def get_note(
 ) -> NoteResponse:
     """Obtiene una nota específica por su ID."""
     note = await service.get_note(note_id)
-    if note is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail="Nota no encontrada."
-        )
     return NoteResponse.model_validate(note)
 
 
@@ -68,9 +58,4 @@ async def complete_note(
 ) -> NoteResponse:
     """Marca una nota como completada."""
     note = await service.complete_note(note_id)
-    if note is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail="Nota no encontrada."
-        )
     return NoteResponse.model_validate(note)
