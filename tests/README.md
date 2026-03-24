@@ -12,7 +12,7 @@ Para garantizar que todos los cambios mantienen la integridad del sistema, sigue
 
 1. **Asegúrate de que el servidor esté activo**:
    ```bash
-   uv run uvicorn api.main:app --port 8000 --reload
+   uv run fastapi dev api/main.py
    ```
 
 2. **Ejecuta el script de pruebas**:

@@ -2,7 +2,7 @@
 test_python.py — Pruebas de integración para la API de Notas.
 
 Instrucciones:
-    1. Arrancar el servidor: uv run uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload
+    1. Arrancar el servidor: uv run fastapi dev api/main.py
     2. Ejecutar este script: uv run python tests/test_python.py
 """
 

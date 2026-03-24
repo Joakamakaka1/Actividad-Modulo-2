@@ -50,7 +50,7 @@ El proyecto utiliza `uv` para una gestión de dependencias eficiente.
 Para iniciar el servidor de desarrollo:
 
 ```bash
-uv run uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload
+uv run fastapi dev api/main.py
 ```
 
 - **Documentación Interactiva (Swagger)**: `http://127.0.0.1:8000/docs`
