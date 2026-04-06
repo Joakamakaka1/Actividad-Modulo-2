@@ -15,13 +15,15 @@ class Settings(BaseSettings):
     # Configuración de CORS por si se quisiera conectar con el frontend (Cross-Origin Resource Sharing)
     BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
 
-    # Configuración de base de datos con SQLite
-    SQLITE_FILE: str = "sqlite.db"
+    # Configuración de base de datos
+    # Este 'localhost' y las credenciales genéricas 'postgres' solo actúan como
+    # VALOR POR DEFECTO EN DESARROLLO si la aplicación no encuentra un archivo .env
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/notes_db"
 
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
-        """Genera la cadena de conexión para SQLAlchemy async."""
-        return f"sqlite+aiosqlite:///{self.SQLITE_FILE}"
+        """Devuelve la cadena de conexión para SQLAlchemy async con PostgreSQL."""
+        return self.DATABASE_URL
 
     # Configuración del modelo de Pydantic para cargar desde .env
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(

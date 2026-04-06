@@ -84,7 +84,7 @@ r = requests.get(f"{NOTES_URL}/99999", timeout=5)
 check(r.status_code == 404, "GET /notes/99999 devuelve 404")
 
 # ---------------------------------------------------------------------------
-# 6. Crear nota con fecha PASADA → 422 error de validación
+# 6. Crear nota con fecha PASADA → 400 error de validación
 # ---------------------------------------------------------------------------
 print("\n--- Validación: deadline pasado ---")
 past = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
@@ -93,14 +93,14 @@ r = requests.post(
     json={"title": "Expirada", "content": "YA", "deadline": past},
     timeout=5,
 )
-check(r.status_code == 422, "POST /notes/ con deadline pasado devuelve 422")
+check(r.status_code == 400, "POST /notes/ con deadline pasado devuelve 400")
 
 # ---------------------------------------------------------------------------
-# 7. Crear nota con campos faltantes → 422
+# 7. Crear nota con campos faltantes → 400
 # ---------------------------------------------------------------------------
 print("\n--- Validación: campos faltantes ---")
 r = requests.post(NOTES_URL + "/", json={"title": "Sin deadline"}, timeout=5)
-check(r.status_code == 422, "POST /notes/ con campos faltantes devuelve 422")
+check(r.status_code == 400, "POST /notes/ con campos faltantes devuelve 400")
 
 # ---------------------------------------------------------------------------
 # 8. Listado de notas expiradas

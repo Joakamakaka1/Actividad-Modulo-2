@@ -2,8 +2,12 @@ from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from api.core.config import settings
 
-# Motor de base de datos asíncrono configurado para SQLite
-engine = create_async_engine(settings.SQLALCHEMY_DATABASE_URI, echo=False)
+# Motor de base de datos asíncrono configurado para PostgreSQL
+engine = create_async_engine(
+    settings.SQLALCHEMY_DATABASE_URI, 
+    echo=False,
+    pool_pre_ping=True
+)
 
 # Fábrica de sesiones asíncronas
 AsyncSessionLocal = async_sessionmaker(
