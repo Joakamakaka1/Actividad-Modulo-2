@@ -23,20 +23,30 @@ async def create_note(
     payload: NoteCreate,
     service: NoteService = Depends(_get_service),
 ) -> NoteResponse:
-    """
-    Crea una nueva nota.
-    El 'deadline' debe ser una fecha futura.
-    Se aplican reglas de saneamiento de texto.
-    """
+    """Crea una nueva nota."""
+    logger.info(f"Intentando crear nueva nota con título: {payload.title}")
     note = await service.create_note(payload)
+    logger.info(f"Nota creada exitosamente con ID: {note.id}")
     return NoteResponse.model_validate(note)
+
+
+@router.get("/", response_model=list[NoteResponse])
+async def list_notes(
+    service: NoteService = Depends(_get_service),
+) -> list[NoteResponse]:
+    """Lista todas las notas."""
+    logger.info("Obteniendo la lista completa de notas.")
+    notes = await service.get_all_notes()
+    logger.info(f"Se obtuvieron {len(notes)} notas.")
+    return [NoteResponse.model_validate(n) for n in notes]
 
 
 @router.get("/expired", response_model=list[NoteResponse])
 async def get_expired_notes(
     service: NoteService = Depends(_get_service),
 ) -> list[NoteResponse]:
-    """Lista todas las notas cuyo plazo ha expirado y no han sido completadas."""
+    """Lista notas cuyo plazo ha expirado y no se han completado."""
+    logger.info("Solicitando notas expiradas.")
     notes = await service.get_expired_notes()
     return [NoteResponse.model_validate(n) for n in notes]
 
@@ -47,6 +57,7 @@ async def get_note(
     service: NoteService = Depends(_get_service),
 ) -> NoteResponse:
     """Obtiene una nota específica por su ID."""
+    logger.info(f"Buscando nota con ID {note_id}")
     note = await service.get_note(note_id)
     return NoteResponse.model_validate(note)
 
@@ -57,5 +68,18 @@ async def complete_note(
     service: NoteService = Depends(_get_service),
 ) -> NoteResponse:
     """Marca una nota como completada."""
+    logger.info(f"Intentando marcar nota {note_id} como completada.")
     note = await service.complete_note(note_id)
+    logger.info(f"Nota {note_id} marcada como completada.")
     return NoteResponse.model_validate(note)
+
+
+@router.delete("/{note_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_note(
+    note_id: int,
+    service: NoteService = Depends(_get_service),
+):
+    """Elimina una nota por su ID."""
+    logger.info(f"Intentando eliminar la nota {note_id}")
+    await service.delete_note(note_id)
+    logger.info(f"Nota {note_id} eliminada exitosamente.")

@@ -30,6 +30,16 @@ class NoteRepository:
         )
         return list(result.scalars().all())
 
+    async def list(self) -> list[Note]:
+        """Obtiene todas las notas de la base de datos."""
+        result = await self._db.execute(select(Note))
+        return list(result.scalars().all())
+
+    async def delete(self, note: Note) -> None:
+        """Elimina una nota de la base de datos."""
+        await self._db.delete(note)
+        await self._db.commit()
+
     async def update(self, note: Note) -> Note:
         """Confirma los cambios realizados en una instancia de Note."""
         await self._db.commit()

@@ -2,16 +2,18 @@ from datetime import datetime, timezone
 from api.models.note import Note
 from api.schemas.note import NoteCreate
 from api.repositories.note_repository import NoteRepository
-from api.core.exceptions import NoteNotFoundException, InvalidDeadlineException
+from api.core.exceptions import NoteNotFoundException
 
 # Lista de palabras no permitidas (saneamiento simple)
 _BAD_WORDS: frozenset[str] = frozenset({"spam", "ofensivo", "basura"})
+
 
 class NoteService:
     """
     Gestiona la lógica de negocio y coordina las llamadas al Repositorio.
     Implementa reglas de validación y transformación de datos.
     """
+
     def __init__(self, repository: NoteRepository) -> None:
         self._repo = repository
 
@@ -39,6 +41,17 @@ class NoteService:
             raise NoteNotFoundException()
         return note
 
+    async def get_all_notes(self) -> list[Note]:
+        """Obtiene todas las notas del repositorio."""
+        return await self._repo.list()
+
+    async def delete_note(self, note_id: int) -> None:
+        """Elimina una nota por su ID. Logica 404 si no existe."""
+        note = await self._repo.get_by_id(note_id)
+        if not note:
+            raise NoteNotFoundException()
+        await self._repo.delete(note)
+
     async def complete_note(self, note_id: int) -> Note:
         """Lógica para marcar una nota como completada."""
         note = await self._repo.get_by_id(note_id)
@@ -60,7 +73,9 @@ class NoteService:
         if deadline.tzinfo is None:
             deadline = deadline.replace(tzinfo=timezone.utc)
         if deadline <= now:
-            raise InvalidDeadlineException()
+            from api.core.exceptions import BadRequestException
+
+            raise BadRequestException(detail="El plazo no puede estar en el pasado.")
 
     @staticmethod
     def _sanitize_text(text: str) -> str:
