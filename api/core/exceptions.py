@@ -15,3 +15,8 @@ class InvalidDeadlineException(BaseAPIException):
     """422 — El deadline proporcionado no es válido."""
     def __init__(self, detail: Any = "El deadline debe ser una fecha futura."):
         super().__init__(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=detail)
+
+class BadRequestException(BaseAPIException):
+    """400 — Petición errónea por lógica de negocio o datos incorrectos."""
+    def __init__(self, detail: Any = "Petición incorrecta."):
+        super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
