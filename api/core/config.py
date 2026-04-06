@@ -15,9 +15,10 @@ class Settings(BaseSettings):
     # Configuración de CORS por si se quisiera conectar con el frontend (Cross-Origin Resource Sharing)
     BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
 
-    # Configuración de base de datos (URL desde .env o entorno)
-    # Por defecto, una URL válida para desarrollo local con Postgres si no hay env
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@db:5432/notes_db"
+    # Configuración de base de datos
+    # Este 'localhost' y las credenciales genéricas 'postgres' solo actúan como
+    # VALOR POR DEFECTO EN DESARROLLO si la aplicación no encuentra un archivo .env
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/notes_db"
 
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:

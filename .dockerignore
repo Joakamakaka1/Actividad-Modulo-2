@@ -1,0 +1,23 @@
+# Entornos virtuales locales
+.venv
+.env
+env/
+venv/
+__pycache__/
+*.pyc
+
+# DB locales (si hubieran quedado restos de SQLite)
+*.db
+sqlite.db
+
+# Git y herramientas
+.git
+.gitignore
+
+# IDEs
+.vscode/
+.idea/
+
+# Herramientas
+uv.lock
+pyproject.toml 
