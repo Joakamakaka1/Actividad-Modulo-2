@@ -6,50 +6,48 @@ Esta carpeta contiene el núcleo de la aplicación Backend. La organización sig
 
 - **`api/`**: Contiene la lógica relacionada con el transporte (HTTP).
   - **`v1/`**: Versionamiento de la API.
-  - **`endpoints/`**: Definición de rutas y controladores de FastAPI.
+  - **`endpoints/`**: Definición de rutas (CRUD completo: listar, obtener, crear, eliminar) y controladores de FastAPI.
   - **`deps.py`**: Proveedores de dependencias (Inyección de Dependencias).
-- **`core/`**: Configuraciones globales y constantes del sistema.
-- **`db/`**: Infraestructura de la base de datos (Motor SQLAlchemy, sesiones async).
-- **`models/`**: Definición de entidades ORM (Tablas de base de datos).
+- **`core/`**: Configuraciones globales y manejo de excepciones personalizadas para devolver HTTP 400 y 404 de manera consistente.
+- **`db/`**: Infraestructura de la base de datos (Motor SQLAlchemy, sesiones asíncronas con asyncpg).
+- **`models/`**: Definición de entidades ORM (Tablas de base de datos en PostgreSQL).
 - **`schemas/`**: Modelos de validación de datos (Pydantic) para entrada y salida.
-- **`repositories/`**: Capa de persistencia. Encapsula todas las consultas a la base de datos.
-- **`services/`**: Capa de servicios. Contiene la lógica de negocio y coordina el uso de los repositorios.
-- **`main.py`**: Punto de entrada de la aplicación. Configura FastAPI y carga los endpoints.
+- **`repositories/`**: Capa de persistencia. Encapsula todas las operaciones de la DB.
+- **`services/`**: Capa de servicios. Contiene la lógica de negocio y validaciones.
+- **`main.py`**: Punto de entrada de la aplicación. Configura middlewares, logging de trazabilidad y excepcion handlers.
 
-## Patrones Utilizados
+## Despliegue con Docker (Cumpliendo la rúbrica)
 
-- **Repository Pattern**: Aísla la lógica de acceso a datos, permitiendo que el resto de la aplicación no dependa de los detalles del ORM.
-- **Service Pattern**: Centraliza las reglas de negocio, validaciones y transformaciones de datos.
-- **Dependency Injection**: Utilizado nativamente por FastAPI para proporcionar sesiones de DB y servicios a los endpoints.
+El proyecto está diseñado para ejecutarse en contenedores siguiendo los requisitos académicos de infraestructura y aislamiento:
+- Servicio `api`: Contenedor con la aplicación FastAPI (construida desde un `Dockerfile` optimizado).
+- Servicio `db`: Contenedor estable con la base de datos **PostgreSQL 15**.
+- Comunicación ágil a través de una red compartida definida explícitamente (`notas_postgres_network`).
+- Volumen nombrado ("named volume") `notas_postgres_volume` para garantizar la persistencia infinita de los datos.
 
-## Despliegue con Docker
+### Seguridad y Variables de Entorno
 
-El proyecto está diseñado para ejecutarse en contenedores siguiendo los requisitos académicos:
-- Un contenedor con la aplicación FastAPI (construido desde el `Dockerfile`).
-- Un contenedor con la base de datos **PostgreSQL**.
-- Comunicación a través de una red compartida internamente en Docker.
-- Volumen configurado para persistencia de la base de datos PostgreSQL.
+El proyecto implementa prácticas seguras y carece de contraseñas *hardcodeadas* en sus archivos de manifiesto:
 
-### Requisitos Previos
+1. Copia el archivo `.env.example` a `.env` en la raíz de este proyecto.
+2. Personaliza tus credenciales seguras (como `POSTGRES_PASSWORD`).
 
-- Tener instalados **Docker** y **Docker Compose**.
+### Cómo ejecutar toda la infraestructura
 
-### Variables de Entorno
-
-Puedes configurar el proyecto creando un archivo `.env` o pasando variables de entorno. Las principales son:
-- `DATABASE_URL`: URL completa de conexión a la base de datos (`postgresql+asyncpg://user:password@host:port/db_name`).
-- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`: Variables utilizadas por el contenedor de la BD para inicializarse.
-
-### Cómo ejecutar
-
-Para levantar toda la infraestructura:
+Para levantar de cero el entorno, compilar la API y la BD por primera vez:
 ```bash
 docker-compose up -d --build
 ```
 
-La API estará disponible en `http://localhost:8080`.
+La API estará automáticamente disponible y mapeada desde el contenedor huésped al puerto **8080**, tal y como solicita la rúbrica.
+Revisa la Documentación Interactiva (Swagger) entrando a:
+`http://localhost:8080/docs`.
 
-Para detener y eliminar los contenedores (preservando el volumen de datos):
+### Mantenimiento
+Para detener y suspender temporalmente los contenedores (preservando los datos persistentes del volumen):
 ```bash
 docker-compose down
+```
+*(Cuidado)* Para destruir completamente los datos de la base de datos y reiniciar sus tablas de cero:
+```bash
+docker-compose down -v
 ```

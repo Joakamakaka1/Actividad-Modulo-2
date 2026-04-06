@@ -12,7 +12,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 
 # Configuración de URLs para las pruebas
-BASE_URL = "http://127.0.0.1:8000/api/v1"
+BASE_URL = "http://127.0.0.1:8080/api/v1"
 NOTES_URL = f"{BASE_URL}/notes"
 
 # Colores para salida en terminal
